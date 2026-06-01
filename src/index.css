@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+/* ────────────────────────────────────────────────────────────────────────
+   TatvaPractice design tokens — ported verbatim from VoiceRx-L design system.
+   Components consume these via Tailwind theme keys (e.g. bg-blue-500) or
+   raw var(--tp-…). Strict even-number sizing rules from design.md apply.
+   ──────────────────────────────────────────────────────────────────────── */
+:root {
+  /* TP Blue — primary brand */
+  --tp-blue-50: #eeeeff;
+  --tp-blue-100: #d8d8fa;
+  --tp-blue-200: #b5b4f2;
+  --tp-blue-300: #8e8de8;
+  --tp-blue-400: #6c6bde;
+  --tp-blue-500: #4b4ad5;
+  --tp-blue-600: #3c3bb5;
+  --tp-blue-700: #2e2d96;
+  --tp-blue-800: #212077;
+  --tp-blue-900: #161558;
+
+  /* TP Violet — secondary / AI signature */
+  --tp-violet-50: #faf5fe;
+  --tp-violet-100: #eddff7;
+  --tp-violet-200: #dbbfef;
+  --tp-violet-300: #c89fe7;
+  --tp-violet-400: #ba7de9;
+  --tp-violet-500: #a461d8;
+  --tp-violet-600: #8a4dbb;
+  --tp-violet-700: #703a9e;
+  --tp-violet-800: #572a81;
+  --tp-violet-900: #3e1c64;
+
+  /* TP Slate — neutrals */
+  --tp-slate-0: #ffffff;
+  --tp-slate-50: #fafafb;
+  --tp-slate-100: #f1f1f5;
+  --tp-slate-200: #e2e2ea;
+  --tp-slate-300: #d0d5dd;
+  --tp-slate-400: #a2a2a8;
+  --tp-slate-500: #717179;
+  --tp-slate-600: #545460;
+  --tp-slate-700: #454551;
+  --tp-slate-800: #2c2c35;
+  --tp-slate-900: #171725;
+
+  /* State */
+  --tp-success-50: #ecfdf5;
+  --tp-success-100: #d1fae5;
+  --tp-success-500: #10b981;
+  --tp-success-600: #059669;
+  --tp-warning-50: #fffbeb;
+  --tp-warning-100: #fef3c7;
+  --tp-warning-500: #f59e0b;
+  --tp-warning-600: #d97706;
+  --tp-error-50: #fff1f2;
+  --tp-error-100: #ffe4e6;
+  --tp-error-500: #e11d48;
+  --tp-error-600: #c8102e;
+
+  /* AI gradient stops */
+  --ai-pink: #d565ea;
+  --ai-violet: #673aac;
+  --ai-indigo: #1a1994;
+  --gradient-ai: linear-gradient(
+    135deg,
+    var(--ai-pink) 0%,
+    var(--ai-violet) 55%,
+    var(--ai-indigo) 100%
+  );
+
+  --radius: 16px;
+
+  /* ── Premium liquid-glass system ── */
+  --glass-bg: rgba(255, 255, 255, 0.58);
+  --glass-bg-strong: rgba(255, 255, 255, 0.74);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow:
+    0 1px 2px rgba(23, 23, 37, 0.04),
+    0 8px 24px -8px rgba(23, 23, 37, 0.12),
+    0 18px 48px -24px rgba(46, 45, 150, 0.18);
+  --glass-inset:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 1px rgba(23, 23, 37, 0.03);
+  --elev-1: 0 1px 2px rgba(23, 23, 37, 0.04), 0 6px 16px -8px rgba(23, 23, 37, 0.10);
+  --elev-2: 0 2px 4px rgba(23, 23, 37, 0.05), 0 16px 40px -16px rgba(46, 45, 150, 0.20);
+}
+
+/* Expose TP tokens to Tailwind utilities (v4 @theme). Keeps `bg-blue-500`,
+   `text-slate-700`, etc. mapped to the brand palette. */
+@theme inline {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  --color-blue-50: var(--tp-blue-50);
+  --color-blue-100: var(--tp-blue-100);
+  --color-blue-200: var(--tp-blue-200);
+  --color-blue-300: var(--tp-blue-300);
+  --color-blue-400: var(--tp-blue-400);
+  --color-blue-500: var(--tp-blue-500);
+  --color-blue-600: var(--tp-blue-600);
+  --color-blue-700: var(--tp-blue-700);
+  --color-blue-800: var(--tp-blue-800);
+  --color-blue-900: var(--tp-blue-900);
+
+  --color-violet-50: var(--tp-violet-50);
+  --color-violet-100: var(--tp-violet-100);
+  --color-violet-200: var(--tp-violet-200);
+  --color-violet-300: var(--tp-violet-300);
+  --color-violet-400: var(--tp-violet-400);
+  --color-violet-500: var(--tp-violet-500);
+  --color-violet-600: var(--tp-violet-600);
+  --color-violet-700: var(--tp-violet-700);
+
+  --color-slate-0: var(--tp-slate-0);
+  --color-slate-50: var(--tp-slate-50);
+  --color-slate-100: var(--tp-slate-100);
+  --color-slate-200: var(--tp-slate-200);
+  --color-slate-300: var(--tp-slate-300);
+  --color-slate-400: var(--tp-slate-400);
+  --color-slate-500: var(--tp-slate-500);
+  --color-slate-600: var(--tp-slate-600);
+  --color-slate-700: var(--tp-slate-700);
+  --color-slate-800: var(--tp-slate-800);
+  --color-slate-900: var(--tp-slate-900);
+
+  --color-success-50: var(--tp-success-50);
+  --color-success-100: var(--tp-success-100);
+  --color-success-500: var(--tp-success-500);
+  --color-success-600: var(--tp-success-600);
+  --color-warning-50: var(--tp-warning-50);
+  --color-warning-100: var(--tp-warning-100);
+  --color-warning-500: var(--tp-warning-500);
+  --color-warning-600: var(--tp-warning-600);
+  --color-error-50: var(--tp-error-50);
+  --color-error-100: var(--tp-error-100);
+  --color-error-500: var(--tp-error-500);
+  --color-error-600: var(--tp-error-600);
+
+  --color-ai-pink: var(--ai-pink);
+  --color-ai-violet: var(--ai-violet);
+  --color-ai-indigo: var(--ai-indigo);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--tp-slate-100);
+  color: var(--tp-slate-700);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+/* Hide scrollbars inside the phone frame but keep scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Liquid glass surfaces ──────────────────────────────────────────────
+   Frosted translucent cards that refract the animated gradient backdrop.
+   `glass` for content cards (readable), `glass-strong` for chrome/bars. */
+.glass {
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+.glass-soft {
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+.glass-strong {
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* ── AI / motion keyframes ─────────────────────────────────────────────── */
+@keyframes ai-gradient-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-ai-pan {
+  background-size: 220% 220%;
+  animation: ai-gradient-pan 6s ease infinite;
+}
+
+@keyframes border-beam {
+  to { offset-distance: 100%; }
+}
+
+@keyframes shiny-sweep {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(12px, -16px) scale(1.06); }
+  66% { transform: translate(-10px, 10px) scale(0.96); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* slow diagonal specular sweep for the glass device hero */
+@keyframes hero-sheen {
+  0% { transform: translateX(-120%) rotate(8deg); opacity: 0; }
+  18% { opacity: 0.6; }
+  40% { transform: translateX(120%) rotate(8deg); opacity: 0; }
+  100% { transform: translateX(120%) rotate(8deg); opacity: 0; }
+}
+.animate-hero-sheen {
+  animation: hero-sheen 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
