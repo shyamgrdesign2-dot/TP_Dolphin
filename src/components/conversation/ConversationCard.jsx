@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronRight, UserCheck } from "lucide-react";
 import { TagRow } from "./IdentifierTag.jsx";
-import { ContextBadge, ConfidencePill, StatusChip, MetaRow } from "./bits.jsx";
+import { ContextBadge, StatusChip, MetaRow } from "./bits.jsx";
 import { Tilt } from "../ui/Tilt.jsx";
 import { useStore } from "../../store/store.jsx";
 
@@ -52,17 +52,14 @@ export function ConversationCard({ conversation, index = 0 }) {
           />
 
           <div className="relative">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <ContextBadge context={conversation.context} />
-                {conversation.isNew && (
-                  <span className="inline-flex items-center rounded-md bg-gradient-to-r from-ai-pink to-ai-indigo px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">
-                    NEW
-                  </span>
-                )}
-                <MetaRow time={conversation.time} duration={conversation.duration} />
-              </div>
-              <ConfidencePill value={conversation.confidence} />
+            <div className="mb-2 flex items-center gap-2">
+              <ContextBadge context={conversation.context} />
+              {conversation.isNew && (
+                <span className="inline-flex items-center rounded-md bg-gradient-to-r from-ai-pink to-ai-indigo px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">
+                  NEW
+                </span>
+              )}
+              <MetaRow time={conversation.time} duration={conversation.duration} />
             </div>
 
             <h3 className="mb-1.5 pr-5 text-[15px] font-semibold leading-snug text-slate-800">

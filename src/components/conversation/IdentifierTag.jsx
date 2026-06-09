@@ -24,7 +24,7 @@ export function IdentifierTag({ type, value, size = "md" }) {
   const sm = size === "sm";
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 font-medium text-slate-600 ${
+      className={`glass-soft inline-flex items-center gap-1.5 rounded-full border border-white/60 font-medium text-slate-600 shadow-[0_1px_2px_rgba(23,23,37,0.04)] ${
         sm ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-[12px]"
       }`}
     >

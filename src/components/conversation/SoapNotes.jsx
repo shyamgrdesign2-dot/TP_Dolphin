@@ -69,7 +69,7 @@ export function SummaryBlock({ summary }) {
           AI summary
         </span>
       </div>
-      <p className="text-[13px] leading-relaxed text-slate-700">{summary}</p>
+      <p className="line-clamp-5 text-[13px] leading-relaxed text-slate-700">{summary}</p>
     </div>
   );
 }

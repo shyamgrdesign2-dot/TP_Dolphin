@@ -172,6 +172,7 @@ export const conversations = [
     title: "Community-acquired pneumonia — day 3 antibiotics",
     tags: [
       { type: "bed", value: "Bed 3B-21" },
+      { type: "name", value: "Mr. Imran Q." },
       { type: "age", value: "47 yrs" },
       { type: "mrn", value: "MRN-48233" },
     ],
@@ -256,8 +257,8 @@ export const conversations = [
     title: "Renal colic — pain control & imaging",
     tags: [
       { type: "bed", value: "Bed 3B-17" },
+      { type: "name", value: "Mr. Arjun N." },
       { type: "age", value: "34 yrs" },
-      { type: "mobile", value: "•••• 12000" },
     ],
     summary:
       "Young patient admitted overnight with left renal colic. Pain settled after IM analgesia. Ultrasound shows a 6mm lower-ureteric calculus with mild hydronephrosis. Plan conservative management with alpha-blocker and urology follow-up.",
@@ -373,9 +374,9 @@ export const conversations = [
     suggestedPatientId: "p8",
     title: "Migraine — prophylaxis discussion",
     tags: [
+      { type: "ward", value: "OPD · Rm 4" },
       { type: "name", value: "Ms. Meera K." },
       { type: "age", value: "28 yrs" },
-      { type: "mobile", value: "•••• 88776" },
     ],
     summary:
       "Recurrent migraine with increasing frequency (8 days/month). Triggers include sleep deprivation and screen time. Acute relief partial with NSAIDs. Discussed lifestyle measures and starting prophylaxis with propranolol, plus a headache diary.",
@@ -412,8 +413,9 @@ export const conversations = [
     suggestedPatientId: null,
     title: "Brief query — hypertension medication refill",
     tags: [
+      { type: "ward", value: "OPD · Rm 4" },
+      { type: "name", value: "Mr. S. (partial)" },
       { type: "age", value: "~60 yrs" },
-      { type: "mobile", value: "•••• 40921" },
     ],
     summary:
       "Short consult — stable hypertensive requesting a repeat prescription. BP well controlled on amlodipine. No side effects reported. Refilled for 3 months with advice to continue home monitoring.",

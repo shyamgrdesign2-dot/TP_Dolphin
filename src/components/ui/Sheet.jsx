@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 
 /* Bottom sheet modal, mobile-native feel. Drag handle + scrim. */
-export function Sheet({ open, onClose, title, children }) {
+export function Sheet({ open, onClose, title, footer, children }) {
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     return () => {
@@ -22,7 +22,7 @@ export function Sheet({ open, onClose, title, children }) {
             onClick={onClose}
           />
           <motion.div
-            className="glass-strong relative max-h-[82%] w-full overflow-hidden rounded-t-[24px] shadow-[0_-8px_40px_rgba(23,23,37,0.22)]"
+            className="glass-strong relative flex max-h-[82%] w-full flex-col overflow-hidden rounded-t-[24px] shadow-[0_-8px_40px_rgba(23,23,37,0.22)]"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
@@ -44,9 +44,14 @@ export function Sheet({ open, onClose, title, children }) {
                 {title}
               </div>
             )}
-            <div className="no-scrollbar overflow-y-auto px-5 pb-8">
+            <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-5 pb-4">
               {children}
             </div>
+            {footer && (
+              <div className="border-t border-slate-200/80 bg-white px-5 pb-6 pt-3">
+                {footer}
+              </div>
+            )}
           </motion.div>
         </div>
       )}

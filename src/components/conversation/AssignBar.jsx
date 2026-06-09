@@ -87,55 +87,86 @@ export function AssignBar({ conversation }) {
     setOpen(false);
   }
 
+  const suggestion = suggestedId ? getPatient(suggestedId) : null;
+
+  const openSheet = () => {
+    setPending(conversation.assignedPatientId || suggestedId);
+    setOpen(true);
+  };
+
   return (
     <>
-      <motion.button
-        whileTap={{ scale: 0.99 }}
-        onClick={() => {
-          setPending(conversation.assignedPatientId || suggestedId);
-          setOpen(true);
-        }}
-        className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left ${
-          assigned
-            ? "border-success-500/30 bg-success-50"
-            : "border-dashed border-blue-300 bg-blue-50/50"
-        }`}
-      >
-        <span
-          className={`flex h-10 w-10 items-center justify-center rounded-full ${
-            assigned ? "bg-success-500 text-white" : "bg-blue-500 text-white"
-          }`}
+      {assigned ? (
+        <motion.button
+          whileTap={{ scale: 0.99 }}
+          onClick={openSheet}
+          className="flex w-full items-center gap-3 rounded-2xl border border-success-500/30 bg-success-50 p-3 text-left"
         >
-          {assigned ? <UserCheck size={18} /> : <UserPlus size={18} />}
-        </span>
-        <div className="min-w-0 flex-1">
-          {assigned ? (
-            <>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-success-600">
-                Assigned to
-              </p>
-              <p className="truncate text-[14px] font-semibold text-slate-800">
-                {assigned.name} · {assigned.mrn}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-[14px] font-semibold text-slate-800">
-                Assign to a patient
-              </p>
-              <p className="text-[12px] text-slate-500">
-                AI detected this conversation — link it to a real record
-              </p>
-            </>
-          )}
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-success-500 text-white">
+            <UserCheck size={18} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-success-600">
+              Assigned to
+            </p>
+            <p className="truncate text-[14px] font-semibold text-slate-800">
+              {assigned.name} · {assigned.mrn}
+            </p>
+          </div>
+          <span className="text-[12px] font-semibold text-blue-500">Change</span>
+          <ChevronRight size={16} className="text-slate-300" />
+        </motion.button>
+      ) : (
+        <div>
+          <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-blue-600">
+            <UserPlus size={12} strokeWidth={2.6} /> Assign a patient
+          </p>
+          <motion.button
+            whileTap={{ scale: 0.99 }}
+            onClick={openSheet}
+            className="flex w-full items-center gap-2.5 rounded-2xl border border-blue-300 bg-white/70 px-3.5 py-3 text-left shadow-[0_8px_22px_-14px_rgba(75,74,213,0.5)]"
+          >
+            <Search size={17} className="text-blue-500" />
+            <span className="flex-1 text-[14px] text-slate-400">
+              Search name, MRN or bed…
+            </span>
+            {suggestion && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-1 text-[11px] font-bold text-violet-700">
+                <Sparkles size={10} /> {suggestion.name.split(" ")[0]}
+              </span>
+            )}
+          </motion.button>
         </div>
-        <span className="text-[12px] font-semibold text-blue-500">
-          {assigned ? "Change" : "Assign"}
-        </span>
-        <ChevronRight size={16} className="text-slate-300" />
-      </motion.button>
+      )}
 
-      <Sheet open={open} onClose={() => setOpen(false)} title="Assign to patient">
+      <Sheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Assign to patient"
+        footer={
+          <div className="flex gap-2.5">
+            {assigned && (
+              <button
+                onClick={() => {
+                  unassignPatient(conversation.id);
+                  show("Assignment removed");
+                  setOpen(false);
+                }}
+                className="flex h-12 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 text-[14px] font-semibold text-slate-600"
+              >
+                <X size={15} /> Unassign
+              </button>
+            )}
+            <button
+              onClick={confirm}
+              disabled={!pending}
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-500 text-[14px] font-semibold text-white disabled:opacity-40"
+            >
+              <Check size={16} strokeWidth={2.6} /> Confirm assignment
+            </button>
+          </div>
+        }
+      >
         <div className="mb-3 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
           <Search size={16} className="text-slate-400" />
           <input
@@ -156,28 +187,6 @@ export function AssignBar({ conversation }) {
               onSelect={setPending}
             />
           ))}
-        </div>
-
-        <div className="sticky bottom-0 mt-4 flex gap-2.5 bg-white pt-3">
-          {assigned && (
-            <button
-              onClick={() => {
-                unassignPatient(conversation.id);
-                show("Assignment removed");
-                setOpen(false);
-              }}
-              className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 text-[14px] font-semibold text-slate-600"
-            >
-              <X size={15} /> Unassign
-            </button>
-          )}
-          <button
-            onClick={confirm}
-            disabled={!pending}
-            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-500 text-[14px] font-semibold text-white disabled:opacity-40"
-          >
-            <Check size={16} strokeWidth={2.6} /> Confirm assignment
-          </button>
         </div>
       </Sheet>
     </>

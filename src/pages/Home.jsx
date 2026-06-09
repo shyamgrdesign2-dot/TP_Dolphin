@@ -6,9 +6,9 @@ import { NumberTicker } from "../components/ui/NumberTicker.jsx";
 import { ConversationCard } from "../components/conversation/ConversationCard.jsx";
 import { Tilt } from "../components/ui/Tilt.jsx";
 import { useStore } from "../store/store.jsx";
-import { doctor, sessions } from "../data/mock.js";
+import { doctor } from "../data/mock.js";
 
-function StatCard({ value, label, icon: Icon, tint, delay }) {
+function StatCard({ value, label, icon: Icon, tint, delay, onClick }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -16,7 +16,7 @@ function StatCard({ value, label, icon: Icon, tint, delay }) {
       transition={{ delay, duration: 0.3 }}
       className="flex-1"
     >
-      <Tilt max={10} className="group h-full">
+      <Tilt max={10} onClick={onClick} className="group h-full">
         <div className="glass relative h-full overflow-hidden rounded-2xl p-3.5 shadow-[0_1px_2px_rgba(23,23,37,0.04),0_8px_22px_-12px_rgba(23,23,37,0.16)] transition-shadow duration-300 group-hover:shadow-[0_2px_6px_rgba(23,23,37,0.06),0_16px_36px_-16px_rgba(75,74,213,0.30)]">
           <span
             className="pointer-events-none absolute inset-0 rounded-2xl"
@@ -48,7 +48,7 @@ function StatCard({ value, label, icon: Icon, tint, delay }) {
 export default function Home() {
   const navigate = useNavigate();
   const { stats, conversations } = useStore();
-  const latest = conversations.slice(0, 2);
+  const latest = conversations.slice(0, 3);
 
   return (
     <div className="relative min-h-full pb-28">
@@ -82,6 +82,7 @@ export default function Home() {
             icon={Layers}
             tint={{ bg: "var(--tp-blue-50)", fg: "var(--tp-blue-500)" }}
             delay={0.05}
+            onClick={() => navigate("/conversations")}
           />
           <StatCard
             value={stats.pendingReview}
@@ -89,6 +90,7 @@ export default function Home() {
             icon={Sparkles}
             tint={{ bg: "var(--tp-warning-50)", fg: "var(--tp-warning-600)" }}
             delay={0.12}
+            onClick={() => navigate("/conversations?status=needreview")}
           />
           <StatCard
             value={stats.assigned}
@@ -96,48 +98,12 @@ export default function Home() {
             icon={UserCheck}
             tint={{ bg: "var(--tp-success-50)", fg: "var(--tp-success-600)" }}
             delay={0.19}
+            onClick={() => navigate("/conversations?status=assigned")}
           />
         </div>
 
-        {/* sessions strip */}
-        <div className="mt-6">
-          <h2 className="mb-2.5 text-[13px] font-semibold text-slate-700">
-            Today's sessions
-          </h2>
-          <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-            {sessions.map((s) => (
-              <Tilt key={s.id} max={8} onClick={() => navigate("/conversations")} className="group min-w-[152px]">
-                <div className="glass relative h-full overflow-hidden rounded-2xl p-3.5 text-left shadow-[0_1px_2px_rgba(23,23,37,0.04),0_8px_22px_-14px_rgba(23,23,37,0.18)] transition-shadow duration-300 group-hover:shadow-[0_2px_6px_rgba(23,23,37,0.06),0_16px_36px_-16px_rgba(75,74,213,0.26)]">
-                  <span
-                    className="pointer-events-none absolute inset-0 rounded-2xl"
-                    style={{
-                      padding: 1,
-                      background: "linear-gradient(150deg, rgba(255,255,255,0.95), rgba(226,226,234,0.85))",
-                      WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                      WebkitMaskComposite: "xor",
-                      maskComposite: "exclude",
-                    }}
-                  />
-                  <span
-                    className={`mb-2 inline-flex w-fit items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
-                      s.context === "IPD" ? "bg-blue-50 text-blue-600" : "bg-violet-100 text-violet-700"
-                    }`}
-                  >
-                    {s.context}
-                  </span>
-                  <p className="text-[13px] font-semibold leading-tight text-slate-800">{s.name}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">{s.window}</p>
-                  <p className="mt-2 text-[12px] font-semibold text-slate-600">
-                    {s.count} conversations
-                  </p>
-                </div>
-              </Tilt>
-            ))}
-          </div>
-        </div>
-
         {/* latest captures */}
-        <div className="mt-6">
+        <div className="mt-7">
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="text-[13px] font-semibold text-slate-700">
               Latest captures

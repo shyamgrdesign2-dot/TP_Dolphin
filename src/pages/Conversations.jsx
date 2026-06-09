@@ -1,70 +1,86 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { ConversationCard } from "../components/conversation/ConversationCard.jsx";
+import { Segmented } from "../components/ui/Segmented.jsx";
 import { useStore } from "../store/store.jsx";
 
-const FILTERS = [
+// Top level: assignment status
+const STATUS_FILTERS = [
   { key: "all", label: "All" },
-  { key: "unassigned", label: "Needs review" },
+  { key: "needreview", label: "Need review" },
   { key: "assigned", label: "Assigned" },
+];
+
+// Second level: care context
+const CONTEXT_TABS = [
+  { key: "both", label: "Both" },
   { key: "IPD", label: "IPD" },
   { key: "OPD", label: "OPD" },
 ];
 
 export default function Conversations() {
   const { conversations, stats } = useStore();
-  const [filter, setFilter] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [status, setStatus] = useState(searchParams.get("status") || "all");
+  const [context, setContext] = useState("both");
   const [query, setQuery] = useState("");
+
+  // honour ?status= when arriving from Home stat cards
+  useEffect(() => {
+    const s = searchParams.get("status");
+    if (s && ["all", "needreview", "assigned"].includes(s)) setStatus(s);
+  }, [searchParams]);
+
+  const setStatusFilter = (key) => {
+    setStatus(key);
+    setSearchParams(key === "all" ? {} : { status: key }, { replace: true });
+  };
 
   const filtered = useMemo(() => {
     return conversations.filter((c) => {
-      const matchFilter =
-        filter === "all"
+      const matchStatus =
+        status === "all"
           ? true
-          : filter === "unassigned"
+          : status === "needreview"
           ? c.status === "unassigned"
-          : filter === "assigned"
-          ? c.status !== "unassigned"
-          : c.context === filter;
+          : c.status !== "unassigned";
+      const matchContext = context === "both" ? true : c.context === context;
       const q = query.trim().toLowerCase();
       const matchQuery =
         !q ||
         c.title.toLowerCase().includes(q) ||
         c.summary.toLowerCase().includes(q) ||
         c.tags.some((t) => t.value.toLowerCase().includes(q));
-      return matchFilter && matchQuery;
+      return matchStatus && matchContext && matchQuery;
     });
-  }, [conversations, filter, query]);
-
-  // group by session, preserving order
-  const groups = useMemo(() => {
-    const map = new Map();
-    for (const c of filtered) {
-      if (!map.has(c.session)) map.set(c.session, []);
-      map.get(c.session).push(c);
-    }
-    return [...map.entries()];
-  }, [filtered]);
+  }, [conversations, status, context, query]);
 
   return (
     <div className="min-h-full pb-28">
       {/* sticky header */}
       <div className="glass-strong sticky top-0 z-30 px-4 pb-3 pt-6">
-        <div className="mb-3 flex items-end justify-between">
+        {/* title + context segmented (top-right) */}
+        <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-[20px] font-bold text-slate-900">Captures</h1>
+            <h1 className="text-[22px] font-bold tracking-[-0.01em] text-slate-900">
+              Captures
+            </h1>
             <p className="text-[12px] font-medium text-slate-500">
               {stats.pendingReview} of {conversations.length} need review
             </p>
           </div>
-          <button className="flex h-10 w-10 items-center justify-center rounded-xl glass-soft border border-slate-200/60 text-slate-500">
-            <SlidersHorizontal size={17} />
-          </button>
+          <Segmented
+            id="ctx"
+            options={CONTEXT_TABS}
+            value={context}
+            onChange={setContext}
+          />
         </div>
 
         {/* search */}
-        <div className="flex items-center gap-2 rounded-xl glass-soft border border-slate-200/60 px-3 py-2.5">
+        <div className="glass-soft flex items-center gap-2 rounded-xl border border-slate-200/60 px-3 py-2.5">
           <Search size={16} className="text-slate-400" />
           <input
             value={query}
@@ -74,23 +90,21 @@ export default function Conversations() {
           />
         </div>
 
-        {/* filter chips */}
-        <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
-          {FILTERS.map((f) => {
-            const active = filter === f.key;
+        {/* status chips */}
+        <div className="mt-3 flex gap-2">
+          {STATUS_FILTERS.map((f) => {
+            const active = status === f.key;
             return (
               <button
                 key={f.key}
-                onClick={() => setFilter(f.key)}
+                onClick={() => setStatusFilter(f.key)}
                 className={`relative whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors ${
-                  active
-                    ? "text-white"
-                    : "glass-soft border border-slate-200/60 text-slate-600"
+                  active ? "text-white" : "glass-soft border border-slate-200/60 text-slate-600"
                 }`}
               >
                 {active && (
                   <motion.span
-                    layoutId="filter-pill"
+                    layoutId="status-pill"
                     className="absolute inset-0 rounded-full bg-blue-500"
                     transition={{ type: "spring", damping: 26, stiffness: 320 }}
                   />
@@ -102,33 +116,24 @@ export default function Conversations() {
         </div>
       </div>
 
-      {/* list */}
-      <div className="px-4 pt-3">
-        {groups.length === 0 && (
-          <div className="mt-20 text-center">
-            <p className="text-[14px] font-medium text-slate-400">
-              No conversations match.
+      {/* flat list — no session segregation */}
+      <div className="px-4 pt-4">
+        {filtered.length === 0 ? (
+          <div className="mt-24 flex flex-col items-center gap-2 text-center">
+            <p className="text-[14px] font-semibold text-slate-500">
+              Nothing here yet
+            </p>
+            <p className="text-[12px] text-slate-400">
+              No conversations match this filter.
             </p>
           </div>
-        )}
-        {groups.map(([session, items]) => (
-          <div key={session} className="mb-5">
-            <div className="mb-2.5 flex items-center gap-2 px-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                {session}
-              </span>
-              <span className="text-[10px] font-bold text-slate-300">
-                {items.length}
-              </span>
-              <span className="h-px flex-1 bg-slate-200" />
-            </div>
-            <div className="flex flex-col gap-3">
-              {items.map((c, i) => (
-                <ConversationCard key={c.id} conversation={c} index={i} />
-              ))}
-            </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filtered.map((c, i) => (
+              <ConversationCard key={c.id} conversation={c} index={i} />
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
