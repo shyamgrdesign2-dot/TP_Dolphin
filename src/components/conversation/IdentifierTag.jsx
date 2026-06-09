@@ -35,28 +35,23 @@ export function IdentifierTag({ type, value, size = "md" }) {
   );
 }
 
-/* Primary identity chip — leads the tag row.
-   tone: "assigned" (confirmed, green) · "match" (AI-matched, neutral) ·
-   "nomatch" (no confident match, amber/warning). */
-export function IdentityChip({ name, tone = "match", size = "md" }) {
+/* Primary identity chip — leads the tag row. Colour reflects assignment status:
+   "assigned" (confirmed, green + tick) · "nomatch" (not yet assigned, amber). */
+export function IdentityChip({ name, tone = "nomatch", size = "md" }) {
   const sm = size === "sm";
-  const cfg = {
+  const TONES = {
     assigned: {
       cls: "border-success-500/30 bg-success-50 text-success-700",
       Icon: UserCheck,
       iconCls: "text-success-600",
-    },
-    match: {
-      cls: "border-blue-200 bg-blue-50 text-blue-700",
-      Icon: User,
-      iconCls: "text-blue-500",
     },
     nomatch: {
       cls: "border-warning-500/40 bg-warning-50 text-warning-700",
       Icon: User,
       iconCls: "text-warning-600",
     },
-  }[tone];
+  };
+  const cfg = TONES[tone] || TONES.nomatch;
   const Icon = cfg.Icon;
   return (
     <span
