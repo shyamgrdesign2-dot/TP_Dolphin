@@ -199,6 +199,8 @@ export function ClinicalNotes({ clinical }) {
     <div className="flex flex-col gap-3">
       {SECTIONS.map((s) => {
         const data = clinical[s.key];
+        // skip sections this note doesn't have (typed IPD notes are partial)
+        if (Array.isArray(data) ? data.length === 0 : !data) return null;
         const count = Array.isArray(data) ? data.length : null;
         return (
           <SectionShell

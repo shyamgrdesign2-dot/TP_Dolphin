@@ -576,6 +576,64 @@ const clinicalById = {
   },
 };
 
+/* ── IPD note typing ───────────────────────────────────────────────────────
+   IPD notes are NEVER "clinical notes" or "SOAP" — they are classified by type,
+   and a single visit can generate several at once. (OPD keeps clinical + SOAP.) */
+export const NOTE_TYPES = {
+  initial: { label: "Initial assessment" },
+  progress: { label: "Progress note" },
+  ot: { label: "OT note" },
+  consult: { label: "Consultation note" },
+  referral: { label: "Cross referral" },
+};
+
+// which note type(s) each IPD conversation produced
+const ipdNoteTypes = {
+  c1: ["progress"],
+  c2: ["progress"],
+  c3: ["progress"],
+  c4: ["progress", "ot"],
+  c5: ["initial"],
+  c6: ["progress"],
+  c7: ["progress", "consult"],
+};
+
+// type-specific bodies for the non-progress notes (clinical-shaped, partial)
+const typedNoteBodies = {
+  c4_ot: {
+    symptoms: [],
+    examinations: [
+      { name: "Wound bed debrided to healthy granulation tissue" },
+      { name: "No deep collection; tendon intact" },
+    ],
+    diagnosis: [{ name: "Bedside debridement — left plantar ulcer", since: "Today" }],
+    medication: [],
+    advice: ["Daily saline dressing", "Offload heel", "Strict glycaemic control"],
+    lab: [],
+    followUp: { when: "48 hours", note: "Re-inspect wound bed" },
+  },
+  c7_consult: {
+    symptoms: [],
+    examinations: [{ name: "Euvolaemic · creatinine trending down (2.8 → 1.6)" }],
+    diagnosis: [{ name: "AKI secondary to urosepsis — nephrology opinion", since: "4 days" }],
+    medication: [],
+    advice: [
+      "Continue IV fluids; avoid nephrotoxic drugs",
+      "No indication for dialysis at present",
+      "Re-refer if creatinine rises",
+    ],
+    lab: [{ name: "Daily U&E" }],
+    followUp: { when: "Daily", note: "Nephrology to review trend" },
+  },
+};
+
 conversations.forEach((c) => {
   c.clinical = clinicalById[c.id];
+  if (c.context === "IPD") {
+    const types = ipdNoteTypes[c.id] || ["progress"];
+    c.notes = types.map((type) => {
+      const special = typedNoteBodies[`${c.id}_${type}`];
+      return { type, clinical: special || c.clinical };
+    });
+  }
 });

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, Copy, ClipboardCheck, Printer, Monitor } from "lucide-react";
 import { useStore } from "../store/store.jsx";
 import { useToast } from "../components/ui/Toast.jsx";
+import { NOTE_TYPES } from "../data/mock.js";
 import { IdentifierTag, IdentityChip } from "../components/conversation/IdentifierTag.jsx";
 import { ContextBadge } from "../components/conversation/bits.jsx";
 import { AssignBar } from "../components/conversation/AssignBar.jsx";
@@ -11,13 +12,6 @@ import { SoapNotes, SummaryBlock } from "../components/conversation/SoapNotes.js
 import { ClinicalNotes } from "../components/conversation/ClinicalNotes.jsx";
 import { TranscriptView } from "../components/conversation/TranscriptView.jsx";
 import { TasksView } from "../components/conversation/TasksView.jsx";
-
-const TABS = [
-  { key: "clinical", label: "Clinical notes" },
-  { key: "soap", label: "SOAP" },
-  { key: "transcript", label: "Transcript" },
-  { key: "tasks", label: "Tasks" },
-];
 
 /* ── plain-text serialisers for copy/print ── */
 const clinicalText = (cl) => {
@@ -43,7 +37,7 @@ export default function ConversationDetail() {
   const navigate = useNavigate();
   const { getConversation, getPatient, markCopied } = useStore();
   const { show } = useToast();
-  const [tab, setTab] = useState("clinical");
+  const [tab, setTab] = useState(null);
 
   const c = getConversation(id);
   if (!c) {
@@ -68,6 +62,29 @@ export default function ConversationDetail() {
     show(label);
   };
 
+  // Tabs are context-driven. OPD → Clinical notes + SOAP. IPD → one tab per
+  // note type (Initial assessment / OT note / Progress note / Consultation /
+  // Cross referral) — never "clinical notes" or "SOAP".
+  const isOPD = c.context === "OPD";
+  const noteTabs = isOPD
+    ? [
+        { key: "clinical", label: "Clinical notes", kind: "note", clinical: c.clinical },
+        { key: "soap", label: "SOAP", kind: "soap" },
+      ]
+    : (c.notes || []).map((n, i) => ({
+        key: `note-${i}`,
+        label: NOTE_TYPES[n.type]?.label || "Note",
+        kind: "note",
+        clinical: n.clinical,
+      }));
+  const tabs = [
+    ...noteTabs,
+    { key: "transcript", label: "Transcript", kind: "transcript" },
+    { key: "tasks", label: "Tasks", kind: "tasks" },
+  ];
+  const activeKey = tab ?? tabs[0].key;
+  const activeTab = tabs.find((t) => t.key === activeKey) || tabs[0];
+
   const primaryRx =
     "flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-[14px] font-semibold text-white shadow-[0_10px_26px_-8px_rgba(75,74,213,0.6)]";
   const primaryFlat =
@@ -77,24 +94,22 @@ export default function ConversationDetail() {
 
   // bottom CTA changes with the active tab
   function ActionBar() {
-    if (tab === "clinical") {
+    if (activeTab.kind === "note") {
       return (
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={() => {
             markCopied(c.id);
-            show(`Clinical notes copied to ${assigned.name.split(" ")[0]}'s RxPad`);
+            show(`${activeTab.label} pushed to ${assigned.name.split(" ")[0]}'s RxPad`);
           }}
           className={primaryRx}
         >
           <ClipboardCheck size={17} />
-          {c.status === "copied"
-            ? "Notes copied — push again"
-            : "Copy clinical notes to RxPad"}
+          {c.status === "copied" ? "Pushed — push again" : `Copy ${activeTab.label} to RxPad`}
         </motion.button>
       );
     }
-    if (tab === "soap") {
+    if (activeTab.kind === "soap") {
       return (
         <>
           <button onClick={() => show("Preparing print preview…")} className={secondaryIcon}>
@@ -110,7 +125,7 @@ export default function ConversationDetail() {
         </>
       );
     }
-    if (tab === "transcript") {
+    if (activeTab.kind === "transcript") {
       return (
         <motion.button
           whileTap={{ scale: 0.98 }}
@@ -211,9 +226,8 @@ export default function ConversationDetail() {
             <div className="mt-4 flex items-start gap-2 rounded-xl bg-warning-50 px-3 py-2.5 text-[12px] font-medium leading-relaxed text-warning-600">
               <Monitor size={14} className="mt-0.5 shrink-0" />
               <span>
-                Assign a patient to review the structured clinical notes,
-                transcript &amp; tasks — once assigned, you can also view them on
-                your desktop RxPad.
+                Assign a patient to review the structured notes, transcript &amp;
+                tasks — once assigned, you can also view them on your desktop RxPad.
               </span>
             </div>
           )}
@@ -224,8 +238,8 @@ export default function ConversationDetail() {
             {/* sticky tabs */}
             <div className="glass-strong sticky top-0 z-20 mt-1 px-4">
               <div className="no-scrollbar flex gap-5 overflow-x-auto border-b border-slate-200/70">
-                {TABS.map((t) => {
-                  const active = tab === t.key;
+                {tabs.map((t) => {
+                  const active = activeKey === t.key;
                   return (
                     <button
                       key={t.key}
@@ -234,7 +248,7 @@ export default function ConversationDetail() {
                     >
                       <span className={active ? "text-slate-900" : "text-slate-400"}>
                         {t.label}
-                        {t.key === "tasks" && (
+                        {t.kind === "tasks" && (
                           <span className="ml-1 text-[11px] text-slate-400">{c.tasks.length}</span>
                         )}
                       </span>
@@ -251,22 +265,21 @@ export default function ConversationDetail() {
               </div>
             </div>
 
-            {/* tab content */}
+            {/* tab content — keyed so switching tabs remounts cleanly */}
             <div className="px-4 pt-4">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={tab}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.22 }}
-                >
-                  {tab === "clinical" && <ClinicalNotes clinical={c.clinical} />}
-                  {tab === "soap" && <SoapNotes soap={c.soap} />}
-                  {tab === "transcript" && <TranscriptView transcript={c.transcript} />}
-                  {tab === "tasks" && <TasksView conversation={c} />}
-                </motion.div>
-              </AnimatePresence>
+              <motion.div
+                key={activeKey}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22 }}
+              >
+                {activeTab.kind === "note" && <ClinicalNotes clinical={activeTab.clinical} />}
+                {activeTab.kind === "soap" && <SoapNotes soap={c.soap} />}
+                {activeTab.kind === "transcript" && (
+                  <TranscriptView transcript={c.transcript} />
+                )}
+                {activeTab.kind === "tasks" && <TasksView conversation={c} />}
+              </motion.div>
             </div>
           </>
         )}
