@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Layers, UserCheck, Sparkles } from "lucide-react";
 import { DeviceHero } from "../components/home/DeviceHero.jsx";
+import { WelcomeCoachmark } from "../components/home/WelcomeCoachmark.jsx";
 import { NumberTicker } from "../components/ui/NumberTicker.jsx";
 import { ConversationCard } from "../components/conversation/ConversationCard.jsx";
 import { Tilt } from "../components/ui/Tilt.jsx";
@@ -48,7 +49,11 @@ function StatCard({ value, label, icon: Icon, tint, delay, onClick }) {
 export default function Home() {
   const navigate = useNavigate();
   const { stats, conversations } = useStore();
-  const latest = conversations.slice(0, 3);
+  // surface the items that need action first
+  const latest = [...conversations]
+    .sort((a, b) => (b.status === "unassigned") - (a.status === "unassigned"))
+    .slice(0, 3);
+  const hasPending = stats.pendingReview > 0;
 
   return (
     <div className="relative min-h-full pb-28">
@@ -57,7 +62,7 @@ export default function Home() {
         <div className="mb-5 flex items-center justify-between">
           <div>
             <p className="text-[12px] font-medium text-slate-500">Good morning</p>
-            <h1 className="text-[21px] font-bold tracking-[-0.01em] text-slate-900">
+            <h1 className="text-[22px] font-bold tracking-[-0.01em] text-slate-900">
               {doctor.name}
             </h1>
             <p className="mt-0.5 text-[11px] font-medium text-slate-400">
@@ -73,6 +78,8 @@ export default function Home() {
         </div>
 
         <DeviceHero />
+
+        <WelcomeCoachmark />
 
         {/* stats */}
         <div className="mt-4 flex gap-3">
@@ -102,14 +109,16 @@ export default function Home() {
           />
         </div>
 
-        {/* latest captures */}
+        {/* captures needing attention */}
         <div className="mt-7">
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="text-[13px] font-semibold text-slate-700">
-              Latest captures
+              {hasPending ? "Needs your review" : "Recent captures"}
             </h2>
             <button
-              onClick={() => navigate("/conversations")}
+              onClick={() =>
+                navigate(hasPending ? "/conversations?status=needreview" : "/conversations")
+              }
               className="inline-flex items-center gap-1 text-[12px] font-semibold text-blue-500"
             >
               View all <ArrowRight size={13} strokeWidth={2.4} />

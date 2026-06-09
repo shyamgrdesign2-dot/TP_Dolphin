@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Copy, ClipboardCheck, Printer, Monitor } from "lucide-react";
 import { useStore } from "../store/store.jsx";
 import { useToast } from "../components/ui/Toast.jsx";
-import { TagRow } from "../components/conversation/IdentifierTag.jsx";
+import { IdentifierTag, IdentityChip } from "../components/conversation/IdentifierTag.jsx";
 import { ContextBadge } from "../components/conversation/bits.jsx";
 import { AssignBar } from "../components/conversation/AssignBar.jsx";
 import { SoapNotes, SummaryBlock } from "../components/conversation/SoapNotes.jsx";
@@ -61,6 +61,9 @@ export default function ConversationDetail() {
   }
 
   const assigned = c.assignedPatientId ? getPatient(c.assignedPatientId) : null;
+  const nameTag = c.tags.find((t) => t.type === "name");
+  const supportTags = c.tags.filter((t) => t.type !== "name");
+  const isMatch = !!c.suggestedPatientId;
   const copy = (text, label) => {
     navigator.clipboard?.writeText(text);
     show(label);
@@ -86,7 +89,9 @@ export default function ConversationDetail() {
           className={primaryRx}
         >
           <ClipboardCheck size={17} />
-          {c.status === "copied" ? "Copied — push again" : "Copy to RxPad"}
+          {c.status === "copied"
+            ? "Notes copied — push again"
+            : "Copy clinical notes to RxPad"}
         </motion.button>
       );
     }
@@ -130,21 +135,36 @@ export default function ConversationDetail() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* header */}
+      {/* header — once assigned, the patient name becomes the heading so it
+          stays visible while the notes tabs are sticky */}
       <div className="glass-strong sticky top-0 z-30">
         <div className="flex items-center gap-3 px-3 pb-3 pt-6">
           <button
             onClick={() => navigate(-1)}
-            className="glass-soft flex h-10 w-10 items-center justify-center rounded-xl border border-white/50 text-slate-600 active:scale-90"
+            className="glass-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/50 text-slate-600 active:scale-90"
           >
             <ArrowLeft size={18} />
           </button>
-          <div className="flex items-center gap-2">
-            <ContextBadge context={c.context} />
-            <span className="text-[12px] font-medium text-slate-400">
-              {c.time} · {c.duration}
-            </span>
-          </div>
+          {assigned ? (
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="truncate text-[15px] font-bold leading-tight text-slate-900">
+                  {assigned.name}
+                </p>
+                <ContextBadge context={c.context} />
+              </div>
+              <span className="mt-0.5 block text-[11px] font-medium text-slate-400">
+                {c.time} · {c.duration}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <ContextBadge context={c.context} />
+              <span className="text-[12px] font-medium text-slate-400">
+                {c.time} · {c.duration}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -160,30 +180,43 @@ export default function ConversationDetail() {
             <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
               Detected identifiers
             </p>
-            <TagRow tags={c.tags} />
+            <div className="flex flex-wrap items-center gap-1.5">
+              {nameTag && (
+                <IdentityChip
+                  name={nameTag.value}
+                  tone={isMatch ? "match" : "nomatch"}
+                />
+              )}
+              {supportTags.map((t, i) => (
+                <IdentifierTag key={i} type={t.type} value={t.value} />
+              ))}
+            </div>
           </div>
 
-          <div className="mt-4">
-            <AssignBar conversation={c} />
-          </div>
-
-          {/* AI summary — shown in both states */}
+          {/* AI summary — at the top, shown in both states */}
           <div className="mt-4">
             <SummaryBlock summary={c.summary} />
           </div>
 
+          {/* assign to patient — below the summary */}
+          <div className="mt-4">
+            <AssignBar conversation={c} />
+          </div>
+
           {assigned ? (
-            <div className="mt-2.5 flex items-center gap-1.5 px-1 text-[11px] font-medium text-slate-400">
-              <Monitor size={12} className="shrink-0" />
-              <span>
-                Synced to {assigned.name}'s desktop RxPad · {c.context}
-              </span>
+            <div className="mt-3 flex w-full items-center gap-2 rounded-xl bg-warning-50 px-3 py-2.5 text-[12px] font-semibold text-warning-600">
+              <Monitor size={14} className="shrink-0" />
+              Synced to {assigned.name}'s desktop RxPad · {c.context}
             </div>
           ) : (
-            <p className="mt-4 px-1 text-[12px] leading-relaxed text-slate-400">
-              Assign this conversation to a patient to review the structured
-              clinical notes, transcript and tasks.
-            </p>
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-warning-50 px-3 py-2.5 text-[12px] font-medium leading-relaxed text-warning-600">
+              <Monitor size={14} className="mt-0.5 shrink-0" />
+              <span>
+                Assign a patient to review the structured clinical notes,
+                transcript &amp; tasks — once assigned, you can also view them on
+                your desktop RxPad.
+              </span>
+            </div>
           )}
         </div>
 

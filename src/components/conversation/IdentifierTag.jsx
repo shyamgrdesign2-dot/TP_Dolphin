@@ -1,5 +1,6 @@
 import {
   User,
+  UserCheck,
   BedDouble,
   Building2,
   Hash,
@@ -30,6 +31,41 @@ export function IdentifierTag({ type, value, size = "md" }) {
     >
       <Icon size={sm ? 11 : 13} className="text-slate-400" strokeWidth={2.2} />
       {value}
+    </span>
+  );
+}
+
+/* Primary identity chip — leads the tag row.
+   tone: "assigned" (confirmed, green) · "match" (AI-matched, neutral) ·
+   "nomatch" (no confident match, amber/warning). */
+export function IdentityChip({ name, tone = "match", size = "md" }) {
+  const sm = size === "sm";
+  const cfg = {
+    assigned: {
+      cls: "border-success-500/30 bg-success-50 text-success-700",
+      Icon: UserCheck,
+      iconCls: "text-success-600",
+    },
+    match: {
+      cls: "border-blue-200 bg-blue-50 text-blue-700",
+      Icon: User,
+      iconCls: "text-blue-500",
+    },
+    nomatch: {
+      cls: "border-warning-500/40 bg-warning-50 text-warning-700",
+      Icon: User,
+      iconCls: "text-warning-600",
+    },
+  }[tone];
+  const Icon = cfg.Icon;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border font-semibold ${cfg.cls} ${
+        sm ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-[12px]"
+      }`}
+    >
+      <Icon size={sm ? 12 : 13} strokeWidth={2.3} className={cfg.iconCls} />
+      {name}
     </span>
   );
 }

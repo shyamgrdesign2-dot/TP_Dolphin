@@ -81,20 +81,34 @@ export default function Settings() {
   return (
     <div className="min-h-full pb-28">
       <div className="px-4 pt-6">
-        <h1 className="mb-4 text-[20px] font-bold text-slate-900">Settings</h1>
+        <h1 className="mb-4 text-[22px] font-bold tracking-[-0.01em] text-slate-900">
+          Settings
+        </h1>
 
         {/* profile */}
-        <div className="mb-5 flex items-center gap-3 rounded-2xl glass border border-slate-200/60 p-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-[18px] font-bold text-white">
-            {doctor.initials}
+        <div className="relative mb-5 overflow-hidden rounded-2xl glass border border-slate-200/60 p-4">
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-16"
+            style={{ background: "linear-gradient(180deg, rgba(164,97,216,0.10), transparent)" }}
+          />
+          <div className="relative flex items-center gap-3">
+            <div
+              className="relative h-14 w-14 shrink-0 rounded-full p-[2px] shadow-[0_6px_18px_-6px_rgba(75,74,213,0.6)]"
+              style={{ background: "var(--gradient-ai)" }}
+            >
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-slate-900/90 text-[16px] font-bold text-white">
+                {doctor.initials}
+              </span>
+              <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-success-500 ring-2 ring-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[16px] font-bold text-slate-900">{doctor.name}</p>
+              <p className="text-[12px] text-slate-500">
+                {doctor.specialty} · {doctor.hospital}
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-slate-300" />
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[16px] font-bold text-slate-900">{doctor.name}</p>
-            <p className="text-[12px] text-slate-500">
-              {doctor.specialty} · {doctor.hospital}
-            </p>
-          </div>
-          <ChevronRight size={18} className="text-slate-300" />
         </div>
 
         <Group title="Device">
@@ -115,9 +129,17 @@ export default function Settings() {
             label="Battery"
             sub="~5h recording remaining"
             right={
-              <span className="text-[13px] font-semibold text-slate-700">
-                {device.battery}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="block h-1.5 w-12 overflow-hidden rounded-full bg-slate-200">
+                  <span
+                    className="block h-full rounded-full bg-success-500"
+                    style={{ width: `${device.battery}%` }}
+                  />
+                </span>
+                <span className="text-[13px] font-semibold text-slate-700">
+                  {device.battery}%
+                </span>
+              </div>
             }
           />
           <Row
