@@ -17,7 +17,6 @@ export function ConversationCard({ conversation, index = 0 }) {
   // lead with the patient identity, then supportive tags
   const nameTag = conversation.tags.find((t) => t.type === "name");
   const supportTags = conversation.tags.filter((t) => t.type !== "name");
-  const isMatch = !!conversation.suggestedPatientId;
   const isIPD = conversation.context === "IPD";
 
   return (
@@ -76,7 +75,7 @@ export function ConversationCard({ conversation, index = 0 }) {
               ) : (
                 <IdentityChip
                   name={nameTag ? nameTag.value : "Unidentified"}
-                  tone={isMatch ? "match" : "nomatch"}
+                  tone="nomatch"
                   size="sm"
                 />
               )}

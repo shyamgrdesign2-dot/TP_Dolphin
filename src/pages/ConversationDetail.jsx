@@ -63,7 +63,6 @@ export default function ConversationDetail() {
   const assigned = c.assignedPatientId ? getPatient(c.assignedPatientId) : null;
   const nameTag = c.tags.find((t) => t.type === "name");
   const supportTags = c.tags.filter((t) => t.type !== "name");
-  const isMatch = !!c.suggestedPatientId;
   const copy = (text, label) => {
     navigator.clipboard?.writeText(text);
     show(label);
@@ -183,8 +182,8 @@ export default function ConversationDetail() {
             <div className="flex flex-wrap items-center gap-1.5">
               {nameTag && (
                 <IdentityChip
-                  name={nameTag.value}
-                  tone={isMatch ? "match" : "nomatch"}
+                  name={assigned ? assigned.name : nameTag.value}
+                  tone={assigned ? "assigned" : "nomatch"}
                 />
               )}
               {supportTags.map((t, i) => (
